@@ -41,15 +41,6 @@ flutter pub get
 flutter run  
 ```
 
-## 🔑 การตั้งค่า API Key (OpenWeather)
-
-1. สมัครและรับ API Key ที่ [OpenWeather API](https://openweathermap.org/api)
-2. สร้างไฟล์ `.env` ในโฟลเดอร์ `lib/` และเพิ่ม API Key
-
-```env
-API_KEY=your_api_key_here  
-```
-
 ## 📈 License
 
 โปรเจกต์นี้ใช้ **MIT License** ✅ สามารถน์นำไปพัฒนาต่อยอดได้
