@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+import 'package:airtest/pages/home_page.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Airsence',
+      home: MyHomePage(),
+      theme: ThemeData(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+    );
+  }
+}
+
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          children: [
+            Expanded(
+              child: HomePage(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
