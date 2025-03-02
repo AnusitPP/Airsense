@@ -161,17 +161,19 @@ class _SearchPageState extends State<SearchPage> {
             ),
             // Main weather info section
             Expanded(
-              child: CustomPaint(
-                painter: WavePainter(),
-                size: Size(double.infinity, 200), 
-                child: WeatherDisplay(
-                  isLoading: isLoading,
-                  errorMessage: errorMessage,
-                  weather: _weather,
-                  pm25: pm25,
-                ),
+              child: WeatherDisplay(
+                isLoading: isLoading,
+                errorMessage: errorMessage,
+                weather: _weather,
+                pm25: pm25,
               ),
             ),
+            CustomPaint(
+              child: CustomPaint(
+                size: Size(MediaQuery.of(context).size.width, 100),
+                painter: WavePainter(),
+              ),
+            )
           ],
         ),
       ),

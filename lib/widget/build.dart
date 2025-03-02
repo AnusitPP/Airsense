@@ -14,7 +14,7 @@ class WeatherDisplay extends StatefulWidget {
     required this.errorMessage,
     required Weather? weather,
     required this.pm25,
-  })  : _weather = weather;
+  }) : _weather = weather;
 
   @override
   State<WeatherDisplay> createState() => _WeatherDisplayState();
@@ -90,14 +90,16 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
         if (widget.pm25 != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
                   "PM2.5",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
                 Text(
@@ -113,6 +115,7 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
               ],
