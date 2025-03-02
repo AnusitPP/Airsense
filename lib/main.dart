@@ -33,7 +33,7 @@ class MyHomePage extends StatelessWidget {
           children: [
             Expanded(
               child: HomePage(),
-            ),
+              )
           ],
         ),
       ),
