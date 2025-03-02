@@ -7,6 +7,8 @@ import 'package:airtest/consts.dart';
 import 'package:weather/weather.dart';
 
 class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
+
   @override
   _SearchPageState createState() => _SearchPageState();
 }
