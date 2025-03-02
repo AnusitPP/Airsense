@@ -1,32 +1,28 @@
 import 'dart:convert';
-import 'package:airtest/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
 import 'package:http/http.dart' as http;
+import 'package:airtest/consts.dart';
+import 'package:airtest/forecast_data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
-
-  // เอาไว้ปรับใน appbar
-  // @override
-  // Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
 
 class _HomePageState extends State<HomePage> {
   final WeatherFactory _wf = WeatherFactory(openWeatherAPIKEY);
   Weather? _weather;
-  double? pm25; // เก็บค่าฝุ่น PM2.5
+  double? pm25;
   bool isLoading = false;
   String errorMessage = '';
-  String selectedCity = 'Nakhon Ratchasima'; // จังหวัดเริ่มต้น
+  String selectedCity = 'Nakhon Ratchasima';
 
   List<String> cities = [];
-  TextEditingController cityController =
-      TextEditingController(); // Controller สำหรับ TextField
+  TextEditingController cityController = TextEditingController();
   bool _isSearching = false;
 
   @override
@@ -35,44 +31,32 @@ class _HomePageState extends State<HomePage> {
     _fetchWeather();
   }
 
-  Future<void> _fetchCities(String text) async {
-    final String url =
-        'http://api.openweathermap.org/data/2.5/find?q=bangkok&appid=$openWeatherAPIKEY';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          // ตัวอย่างการดึงชื่อเมืองจากผลลัพธ์
-          cities = List<String>.from(data['list'].map((city) => city['name']));
-        });
-      } else {
-        // หากเกิดข้อผิดพลาดในการดึงข้อมูล
-        print('Error: Unable to fetch cities');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  // ดึงข้อมูลสภาพอากาศ
   Future<void> _fetchWeather() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final weather = await _wf.currentWeatherByCityName(selectedCity);
       setState(() {
         _weather = weather;
+        isLoading = false;
       });
       _fetchPM25(weather.latitude!, weather.longitude!);
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: $e';
+        errorMessage = 'Error: City Not Found Try agin';
+        isLoading = false;
       });
     }
   }
 
-  // ดึงข้อมูลค่าฝุ่น PM2.5
+//ฟังชันการเปลี่ยนตัวอักษรพิมพ์แรกเป็นตัวพิมพ์ใหญ่อัตโนมัติ
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
   Future<void> _fetchPM25(double lat, double lon) async {
     setState(() {
       isLoading = true;
@@ -99,247 +83,406 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: $e';
+        errorMessage = 'Error: Not a PM 2.5 Data';
         isLoading = false;
       });
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.orange[100],
-    appBar: AppBar(
-      titleTextStyle: TextStyle(
-        fontSize: 24,
-        color: Colors.white, // สีข้อความใน title
-        fontWeight: FontWeight.bold,
-      ),
-      title: Center(
-        child: _isSearching
-            ? TextField(
-                controller: cityController,
-                autofocus: true,
-                style: TextStyle(color: Colors.orange[800],fontSize: 24), // สีข้อความใน TextField
-                decoration: InputDecoration(
-                  hintText: 'ค้นหาชื่อเมือง...',
-                  hintStyle: TextStyle(
-                    color: Colors.orange[800], // สีของ hint
-                    fontWeight: FontWeight.bold,
-                  ),
-                  border: InputBorder.none,
-                ),
-                onSubmitted: (newCity) {
-                  setState(() {
-                    selectedCity = newCity; // อัพเดทชื่อเมืองเมื่อกด Enter
-                    _isSearching = false; // ปิด TextField
-                  });
-                },
-              )
-            : Row(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF0F2F5),
+      body: ClipRRect(
+        borderRadius: BorderRadius.circular(0), // ลบการกำหนดขอบมุม
+        child: Column(
+          children: [
+            // Search bar at top
+            Padding(
+              padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.pin_drop_outlined),
-                  SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isSearching = true; // เปลี่ยนเป็น TextField เมื่อคลิกที่ชื่อ
-                      });
-                    },
-                    child: selectedCity.isEmpty
-                        ? _locationHeader()
-                        : Text(
-                            selectedCity,
-                            style: TextStyle(color: Colors.orange[800]), // สีข้อความในชื่อเมือง
+                  _isSearching
+                      ? Expanded(
+                          child: TextField(
+                            controller: cityController,
+                            autofocus: true,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              hintText: 'Search city...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: () {
+                                  setState(() {                        
+                                    selectedCity = cityController.text;
+                                    selectedCity = capitalizeFirstLetter(selectedCity);
+                                    _isSearching = false;
+                                  });
+                                  _fetchWeather();
+                                },
+                              ),
+                            ),
+                            onSubmitted: (newCity) {
+                              setState(() {
+                                selectedCity = capitalizeFirstLetter(newCity);
+                                cityController.text = selectedCity;
+                                _isSearching = false;
+                              });
+                              _fetchWeather();
+                            },
                           ),
-                  ),
-                  SizedBox(width: 5),
-                  IconButton(
-                    icon: Icon(Icons.search, color: Colors.orange[800]), // สีไอคอนค้นหา
-                    onPressed: () {
-                      setState(() {
-                        _isSearching = true; // เปิด TextField เมื่อกดปุ่มค้นหา
-                      });
-                      _fetchCities(cityController.text); // ดึงข้อมูลเมืองเมื่อกดปุ่มค้นหา
-                    },
-                  ),
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isSearching = true;
+                            });
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.location_on),
+                              const SizedBox(width: 8),
+                              Text(
+                                selectedCity,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.search),
+                            ],
+                          ),
+                        ),
                 ],
               ),
+            ),
+
+            // Main weather info section
+            Expanded(
+              child: _buildMainWeatherDisplay(),
+            ),
+
+            // Forecast section
+            Container(
+              height: 140,
+              color: Colors.white,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                // children: forecastData.map((data) {
+                //   return _buildDayForecast(
+                //       data['day'],
+                //       data['precipitation'],
+                //       data['highTemp'],
+                //       data['lowTemp'],
+                //       data['isSelected'] ? Colors.cyan : Colors.cyan.shade100,
+                //       data['isSelected']);
+                // }).toList(),
+              ),
+            ),
+
+            // Bottom wave decoration
+            Container(
+              height: 60,
+              child: CustomPaint(
+                size: const Size(double.infinity, 60),
+                painter: WavePainter(),
+              ),
+            ),
+          ],
+        ),
       ),
-      backgroundColor: Colors.orange[100], // สีพื้นหลังของ AppBar
-      iconTheme: IconThemeData(color: Colors.orange[800]), // สีไอคอนทั้งหมดใน AppBar
-    ),
-    body: SingleChildScrollView(
+    );
+  }
+
+  Widget _buildMainWeatherDisplay() {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else if (errorMessage.isNotEmpty) {
+      return Center(
+        child: Text(
+          errorMessage,
+          style: const TextStyle(
+              color: Colors.grey, fontSize: 50, fontWeight: FontWeight.bold),
+        ),
+      );
+    } else if (_weather == null) {
+      return const Center(
+        child: Text("No weather data available"),
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        // Temperature
+        Text(
+          "${_weather?.temperature?.celsius?.toStringAsFixed(0)}°",
+          style: const TextStyle(
+            fontSize: 80,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Weather condition
+        Text(
+          _weather?.weatherDescription ?? "",
+          style: const TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Location and date
+        Text(
+          "${DateFormat("HH:mm").format(_weather!.date!)} ",
+          style: const TextStyle(
+            fontSize: 38,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          "${DateFormat("EEEE, d MMMM yyyy").format(_weather!.date!)} ",
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 5),
+
+        const SizedBox(height: 20),
+
+        // PM2.5 information
+        if (pm25 != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              children: [
+                const Text(
+                  "PM2.5",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      " ${pm25?.toStringAsFixed(2)}",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: _getPM25Color(pm25!),
+                      ),
+                    ),
+                    const Text(
+                      " µg/m³",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Color _getPM25Color(double value) {
+    if (value <= 12) {
+      return Colors.green;
+    } else if (value <= 35.4) {
+      return Colors.yellow;
+    } else if (value <= 55.4) {
+      return Colors.orange;
+    } else if (value <= 150.4) {
+      return Colors.red;
+    } else if (value <= 250.4) {
+      return Colors.purple;
+    } else {
+      return Colors.brown;
+    }
+  }
+
+  Widget _buildDayForecast(String day, String precipitation, String highTemp,
+      String lowTemp, Color color, bool isSelected) {
+    return Container(
+      width: 80,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: isSelected ? color : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: Colors.grey,
+          width: isSelected ? 0 : 1,
+        ),
+      ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildUI(),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: cities.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(cities[index]),
-                onTap: () {
-                  setState(() {
-                    selectedCity = cities[index]; // ตั้งค่าเมื่อเลือกเมือง
-                  });
-                },
-              );
-            },
+          Text(
+            day,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Icon(
+            _getWeatherIcon(precipitation),
+            color: isSelected ? Colors.white : Colors.black,
+            size: 30,
+          ),
+          const SizedBox(height: 5),
+          Text(
+            precipitation,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            '$highTemp $lowTemp',
+            style: TextStyle(
+              fontSize: 12,
+              color: isSelected ? Colors.white : Colors.black,
+            ),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
+
+  IconData _getWeatherIcon(String precipitation) {
+    double precip = double.tryParse(precipitation.replaceAll('%', '')) ?? 0;
+    if (precip >= 60) {
+      return Icons.thunderstorm;
+    } else if (precip >= 40) {
+      return Icons.grain;
+    } else if (precip >= 20) {
+      return Icons.cloud;
+    } else {
+      return Icons.wb_sunny;
+    }
+  }
 }
 
+// Custom painter for cloud with rain
+class CloudRainPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint cloudPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
 
-  // ignore: unused_element
-  Widget _buildUI() {
-    if (_weather == null) {
-      return Center(
-        child: CircularProgressIndicator(),
+    final Path cloudPath = Path();
+    // Draw a simple cloud shape
+    cloudPath.moveTo(size.width * 0.25, size.height * 0.5);
+    cloudPath.quadraticBezierTo(
+      size.width * 0.2,
+      size.height * 0.35,
+      size.width * 0.35,
+      size.height * 0.35,
+    );
+    cloudPath.quadraticBezierTo(
+      size.width * 0.4,
+      size.height * 0.2,
+      size.width * 0.5,
+      size.height * 0.25,
+    );
+    cloudPath.quadraticBezierTo(
+      size.width * 0.6,
+      size.height * 0.15,
+      size.width * 0.65,
+      size.height * 0.3,
+    );
+    cloudPath.quadraticBezierTo(
+      size.width * 0.8,
+      size.height * 0.25,
+      size.width * 0.75,
+      size.height * 0.5,
+    );
+    cloudPath.close();
+
+    canvas.drawPath(cloudPath, cloudPaint);
+
+    // Draw rain drops
+    final Paint rainPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    // Draw several rain drops
+    for (int i = 0; i < 7; i++) {
+      final double startX = size.width * (0.3 + i * 0.07);
+      final double startY = size.height * 0.6;
+      canvas.drawLine(
+        Offset(startX, startY),
+        Offset(startX + 5, startY + 15),
+        rainPaint,
       );
     }
-    return Center(
-      child: SizedBox(
-        child: Column(
-          children: [
-            SizedBox(height: MediaQuery.sizeOf(context).height * 0.05),
-            _weatherIcon(),
-            _currentTemp(),
-            SizedBox(height: MediaQuery.sizeOf(context).height * 0.02),
-            _dateTimeinfo(),
-            SizedBox(height: MediaQuery.sizeOf(context).height * 0.05),
-            _pm25Widget(), // เพิ่ม Widget แสดงค่าฝุ่น PM2.5
-          ],
-        ),
-      ),
-    );
   }
 
-  Widget _locationHeader() {
-    return Text(
-      _weather?.areaName ?? "",
-      style: TextStyle(
-          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange[800]),
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for waves at bottom
+class WavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFF20CCED),
+          const Color(0xFF20CCED),
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final Path path = Path();
+    path.moveTo(0, size.height);
+
+    // First wave
+    path.quadraticBezierTo(
+      size.width * 0.25,
+      size.height - 20,
+      size.width * 0.5,
+      size.height - 10,
     );
+
+    // Second wave
+    path.quadraticBezierTo(
+      size.width * 0.75,
+      size.height,
+      size.width,
+      size.height - 15,
+    );
+
+    // Complete the path
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
   }
 
-  Widget _dateTimeinfo() {
-    DateTime now = _weather!.date!;
-    return Column(
-      children: [
-        Text(
-          DateFormat("h:mm a").format(now),
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.orange[800]),
-        ),
-        SizedBox(height: 20),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              DateFormat("EEEE,  ").format(now),
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange[800]),
-            ),
-            Text(
-              DateFormat.yMMMMd('en_US').format(now),
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange[800]),
-            )
-          ],
-        )
-      ],
-    );
-  }
-
-  Widget _weatherIcon() {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          height: MediaQuery.sizeOf(context).height * 0.2,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: NetworkImage(
-                  "http://openweathermap.org/img/wn/${_weather?.weatherIcon}@4x.png"),
-            ),
-          ),
-        ),
-        Text(_weather?.weatherDescription ?? "",
-            style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange)),
-      ],
-    );
-  }
-
-  Widget _currentTemp() {
-    return Text(
-      "${_weather?.temperature?.celsius?.toStringAsFixed(0)}° C",
-      style: TextStyle(
-          fontSize: 48, fontWeight: FontWeight.bold, color: Colors.orange[800]),
-    );
-  }
-
-  // Widget สำหรับแสดงค่าฝุ่น PM2.5
-  Widget _pm25Widget() {
-    if (isLoading) {
-      return CircularProgressIndicator();
-    } else if (errorMessage.isNotEmpty) {
-      return Text(errorMessage,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.red, fontSize: 16));
-    } else if (pm25 != null) {
-      return SizedBox(
-        child: Column(
-            children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              Text(
-                "PM2.5 : ",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w200,
-                  color: Colors.orange),
-              ),
-              Text(
-                "$pm25",
-                style: TextStyle(
-                  fontSize: 38,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red[500]),
-              ),
-              Text(
-                " µg/m³",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w200,
-                  color: Colors.orange),
-              ),
-              ],
-            ),
-            ],
-          
-        ),
-      );
-    } else {
-      return Text("ไม่มีข้อมูลค่าฝุ่น",
-          style: TextStyle(fontSize: 16, color: Colors.grey));
-    }
-  }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
