@@ -48,15 +48,15 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,  
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Location and date
           Text(
             "${DateFormat("EEEE, d MMMM yyyy").format(widget._weather!.date!)} ",
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.w500,
+              color: Colors.blueGrey,
             ),
           ),
           const SizedBox(height: 2),
@@ -66,10 +66,11 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
             style: const TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF37474F),
             ),
           ),
-          SizedBox(height: 10),
-          
+          SizedBox(height: 40),
+
           // PM 2.5
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -83,8 +84,8 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
                     "PM2.5",
                     style: TextStyle(
                       fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blueGrey,
                     ),
                   ),
                   Text(
@@ -93,6 +94,13 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
                       fontSize: 75,
                       fontWeight: FontWeight.bold,
                       color: _getPM25Color(widget.pm25!),
+                      shadows: [
+                        Shadow(
+                          blurRadius: 2.0,
+                          color: Colors.black38,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
                     ),
                   ),
                   const Text(
@@ -100,27 +108,40 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.blueGrey,
                     ),
                   ),
                   // _getPM25Icon(widget.pm25!),
                 ],
               ),
-              const SizedBox(width: 20),
+              const SizedBox(height: 20),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 30),
           // Temperature
-          Text(
-            "Temperature ${widget._weather?.temperature?.celsius?.toStringAsFixed(0)} °C",
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.thermostat_rounded,
+                color: _getTemperatureColor(
+                    widget._weather?.temperature?.celsius ?? 0),
+                size: 35,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Temperature ${widget._weather?.temperature?.celsius?.toStringAsFixed(0)} °C",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-      
+
           // PM2.5 information
-          if (widget.pm25 != null)
+            if (widget.pm25 != null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Column(
@@ -129,6 +150,7 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
                 children: [],
               ),
             ),
+            Text('Hello World!')
         ],
       ),
     );
@@ -138,7 +160,7 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
     if (value <= 12) {
       return Colors.green;
     } else if (value <= 35.4) {
-      return Colors.yellow;
+      return Color(0xFFFDD835);
     } else if (value <= 55.4) {
       return Colors.orange;
     } else if (value <= 150.4) {
@@ -147,6 +169,20 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
       return Colors.purple;
     } else {
       return Colors.brown;
+    }
+  }
+
+  Color _getTemperatureColor(double value) {
+    if (value < 0) {
+      return Colors.blue.shade900; // อุณหภูมิต่ำกว่าจุดเยือกแข็ง (สีฟ้าเข้ม)
+    } else if (value < 15) {
+      return Colors.blue; // อากาศเย็น (สีฟ้า)
+    } else if (value < 25) {
+      return Color(0xFFFDD835); // อากาศสบายๆ (สีเขียว)
+    } else if (value < 35) {
+      return Colors.orange; // อากาศร้อน (สีส้ม)
+    } else {
+      return Colors.red; // อากาศร้อนจัด (สีแดง)
     }
   }
 

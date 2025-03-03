@@ -24,7 +24,7 @@ class _SearchPageState extends State<SearchPage> {
   List<String> cities = [];
   TextEditingController cityController = TextEditingController();
   bool _isSearching = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +90,9 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width; // ความกว้างหน้าจอ
+    final screenHeight = MediaQuery.of(context).size.height; // ความสูงหน้าจอ
+
     return Scaffold(
       backgroundColor: const Color(0xFFF0F2F5),
       body: ClipRRect(
@@ -97,7 +100,12 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
+              padding: EdgeInsets.only(
+                top: screenHeight * 0.05, // ใช้สัดส่วนของหน้าจอ
+                left: screenWidth * 0.05,
+                right: screenWidth * 0.05,
+                bottom: screenHeight * 0.03,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -148,8 +156,8 @@ class _SearchPageState extends State<SearchPage> {
                               const SizedBox(width: 8),
                               Text(
                                 selectedCity,
-                                style: const TextStyle(
-                                  fontSize: 22,
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.06, // ขนาดฟอนต์ตามความกว้างหน้าจอ
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -172,7 +180,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             CustomPaint(
               child: CustomPaint(
-                size: Size(MediaQuery.of(context).size.width, 100),
+                size: Size(screenWidth, screenHeight * 0.2), // ความสูงของ CustomPaint ขึ้นอยู่กับความสูงของหน้าจอ
                 painter: WavePainter(),
               ),
             )

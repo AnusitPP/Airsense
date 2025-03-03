@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:airtest/pages/home_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,6 +17,7 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(),
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: GoogleFonts.poppins().fontFamily,
       ),
     );
   }
