@@ -1,5 +1,5 @@
+import 'package:airtest/pages/first_page.dart';
 import 'package:flutter/material.dart';
-import 'package:airtest/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -34,7 +34,7 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: HomePage(),
+              child: FirstPage(),
               )
           ],
         ),

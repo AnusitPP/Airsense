@@ -1,0 +1,99 @@
+import 'dart:async';
+import 'package:airtest/pages/home_page.dart';
+import 'package:flutter/material.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen>{
+
+  @override 
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 1), () {
+     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+    });
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class FirstPage extends StatelessWidget {
+  const FirstPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1976D2), Color(0xFF64B5F6)],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 150),
+              Container(
+                height: 150,
+                width: 130,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4.0,
+                        offset: Offset(0, 5))
+                  ],
+                ),
+                child: Icon(Icons.air, size: 80, color: Color(0xFF1976D2)),
+              ),
+              SizedBox(height: 30),
+              Text(
+                'AirSense',
+                style: TextStyle(
+                    fontSize: 38,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.5),
+              ),
+              SizedBox(height: 15),
+              SizedBox(height: 100),
+                GestureDetector(
+                onTap: () {
+                  Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 80),
+                  child: Text(
+                  "Tap anywhere to start",
+                  style: TextStyle(
+                    color: Color.fromRGBO(255, 255, 255, 0.494),
+                    fontSize: 24,
+                  ),
+                  ),
+                ),
+                ),
+              
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

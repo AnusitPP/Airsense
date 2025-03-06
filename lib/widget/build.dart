@@ -45,113 +45,178 @@ class _WeatherDisplayState extends State<WeatherDisplay> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Location and date
-          Text(
-            "${DateFormat("EEEE, d MMMM yyyy").format(widget._weather!.date!)} ",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-              color: Colors.blueGrey,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Location and date
+            Text(
+              "${DateFormat("EEEE, d MMMM yyyy").format(widget._weather!.date!)} ",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.blueGrey,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          // Location and date
-          Text(
-            "${DateFormat("HH:mm").format(widget._weather!.date!)} ",
-            style: const TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF37474F),
+            const SizedBox(height: 2),
+            // Location and date
+            Text(
+              "${DateFormat("HH:mm").format(widget._weather!.date!.toLocal())} ",
+              style: const TextStyle(
+                fontSize: 38,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF37474F),
+              ),
             ),
-          ),
-          SizedBox(height: 40),
+            SizedBox(height: 40),
 
-          // PM 2.5
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+            // PM 2.5
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "PM2.5",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                    Text(
+                      " ${widget.pm25?.toStringAsFixed(2)}",
+                      style: TextStyle(
+                        fontSize: 75,
+                        fontWeight: FontWeight.bold,
+                        color: _getPM25Color(widget.pm25!),
+                        shadows: [
+                          Shadow(
+                            blurRadius: 2.0,
+                            color: Colors.black38,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Text(
+                      " µg/m³",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                    // _getPM25Icon(widget.pm25!),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+            const SizedBox(height: 30),
+            // Temperature
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.thermostat_rounded,
+                  color: _getTemperatureColor(
+                      widget._weather?.temperature?.celsius ?? 0),
+                  size: 35,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  "Temperature ${widget._weather?.temperature?.celsius?.toStringAsFixed(0)} °C",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 30),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
                 children: [
-                  const Text(
-                    "PM2.5",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
-                    ),
-                  ),
-                  Text(
-                    " ${widget.pm25?.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      fontSize: 75,
-                      fontWeight: FontWeight.bold,
-                      color: _getPM25Color(widget.pm25!),
-                      shadows: [
-                        Shadow(
-                          blurRadius: 2.0,
-                          color: Colors.black38,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Text(
-                    " µg/m³",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueGrey,
-                    ),
-                  ),
-                  // _getPM25Icon(widget.pm25!),
+                  SizedBox(width: 10),
+                  Container(
+                      width: 100,
+                      height: 140,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.blue.shade500,
+                          border: Border.all(
+                            color: Colors.blue.shade500,
+                            width: 2,
+                          ))),
+                  SizedBox(width: 10),
+                  Container(
+                      width: 100,
+                      height: 140,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey.shade300,
+                          )),
+                  // SizedBox(width: 10),
+                  // Container(
+                  //     width: 100,
+                  //     height: 140,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: Colors.grey.shade300,
+                  //         )),
+                  // SizedBox(width: 10),
+                  // Container(
+                  //     width: 100,
+                  //     height: 140,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: Colors.grey.shade300,
+                  //         )),
+                  // SizedBox(width: 10),
+                  // Container(
+                  //     width: 100,
+                  //     height: 140,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: Colors.grey.shade300,
+                  //         )),
+                  // SizedBox(width: 10),
+                  // Container(
+                  //     width: 100,
+                  //     height: 140,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: Colors.grey.shade300,
+                  //         )),
+                  // SizedBox(width: 10),
+                  // Container(
+                  //     width: 100,
+                  //     height: 140,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: Colors.grey.shade300,
+                  //         )),
+                  // SizedBox(width: 10),
+                  // Container(
+                  //     width: 100,
+                  //     height: 140,
+                  //     decoration: BoxDecoration(
+                  //         borderRadius: BorderRadius.circular(10),
+                  //         color: Colors.grey.shade300,
+                  //         )),
                 ],
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
-          const SizedBox(height: 30),
-          // Temperature
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.thermostat_rounded,
-                color: _getTemperatureColor(
-                    widget._weather?.temperature?.celsius ?? 0),
-                size: 35,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                "Temperature ${widget._weather?.temperature?.celsius?.toStringAsFixed(0)} °C",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-
-          // PM2.5 information
-            if (widget.pm25 != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [],
-              ),
             ),
-            Text('Hello World!')
-        ],
+          ],
+        ),
       ),
     );
   }

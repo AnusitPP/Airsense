@@ -1,5 +1,4 @@
 import 'package:airtest/widget/build.dart';
-import 'package:airtest/widget/wave.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,6 +9,7 @@ class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SearchPageState createState() => _SearchPageState();
 }
 
@@ -45,8 +45,17 @@ class _SearchPageState extends State<SearchPage> {
       _fetchPM25(weather.latitude!, weather.longitude!);
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: City Not Found. Try again';
+        errorMessage = 'NO DATA';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: City Not Found. Try again"),
+            backgroundColor: Colors.red,
+          ),
+        );
         isLoading = false;
+        if (cityController.text.isEmpty) {
+          cityController.text = "Nakhon Ratchasima";
+        }
       });
     }
   }
@@ -94,81 +103,82 @@ class _SearchPageState extends State<SearchPage> {
     final screenHeight = MediaQuery.of(context).size.height; // ความสูงหน้าจอ
 
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(screenHeight * 0.15),
+        child: Container(
+          padding: EdgeInsets.only(top: 40),
+          child: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _isSearching
+                    ? Expanded(
+                        child: TextField(
+                          controller: cityController,
+                          autofocus: true,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: InputDecoration(
+                            hintText: 'Search city...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.search),
+                              onPressed: () {
+                                setState(() {
+                                  selectedCity = cityController.text;
+                                  selectedCity =
+                                      capitalizeFirstLetter(selectedCity);
+                                  _isSearching = false;
+                                });
+                                _fetchWeather();
+                              },
+                            ),
+                          ),
+                          onSubmitted: (newCity) {
+                            setState(() {
+                              selectedCity = capitalizeFirstLetter(newCity);
+                              cityController.text = selectedCity;
+                              _isSearching = false;
+                            });
+                            _fetchWeather();
+                          },
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isSearching = true;
+                          });
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.location_on),
+                            const SizedBox(width: 8),
+                            Text(
+                              selectedCity,
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.06,
+                                // ขนาดฟอนต์ตามความกว้างหน้าจอ
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.search),
+                          ],
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ),
+      ),
       backgroundColor: const Color(0xFFF0F2F5),
       body: ClipRRect(
         borderRadius: BorderRadius.circular(0),
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.only(
-                top: screenHeight * 0.05, // ใช้สัดส่วนของหน้าจอ
-                left: screenWidth * 0.05,
-                right: screenWidth * 0.05,
-                bottom: screenHeight * 0.03,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _isSearching
-                      ? Expanded(
-                          child: TextField(
-                            controller: cityController,
-                            autofocus: true,
-                            textCapitalization: TextCapitalization.sentences,
-                            decoration: InputDecoration(
-                              hintText: 'Search city...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.search),
-                                onPressed: () {
-                                  setState(() {
-                                    selectedCity = cityController.text;
-                                    selectedCity =
-                                        capitalizeFirstLetter(selectedCity);
-                                    _isSearching = false;
-                                  });
-                                  _fetchWeather();
-                                },
-                              ),
-                            ),
-                            onSubmitted: (newCity) {
-                              setState(() {
-                                selectedCity = capitalizeFirstLetter(newCity);
-                                cityController.text = selectedCity;
-                                _isSearching = false;
-                              });
-                              _fetchWeather();
-                            },
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isSearching = true;
-                            });
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.location_on),
-                              const SizedBox(width: 8),
-                              Text(
-                                selectedCity,
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.06, // ขนาดฟอนต์ตามความกว้างหน้าจอ
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.search),
-                            ],
-                          ),
-                        ),
-                ],
-              ),
-            ),
             // Main weather info section
             Expanded(
               child: WeatherDisplay(
@@ -178,12 +188,6 @@ class _SearchPageState extends State<SearchPage> {
                 pm25: pm25,
               ),
             ),
-            CustomPaint(
-              child: CustomPaint(
-                size: Size(screenWidth, screenHeight * 0.2), // ความสูงของ CustomPaint ขึ้นอยู่กับความสูงของหน้าจอ
-                painter: WavePainter(),
-              ),
-            )
           ],
         ),
       ),
