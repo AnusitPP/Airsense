@@ -16,10 +16,10 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final WeatherFactory _wf = WeatherFactory(openWeatherAPIKEY);
   Weather? _weather;
-  double? pm25;
+  double? pm25, pm10, co, no2, o3, aqi;
   bool isLoading = false;
   String errorMessage = '';
-  String selectedCity = 'Nakhon Ratchasima';
+  String selectedCity = 'Bangkok';
 
   List<String> cities = [];
   TextEditingController cityController = TextEditingController();
@@ -80,7 +80,8 @@ class _SearchPageState extends State<SearchPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          pm25 = data['list'][0]['components']['pm2_5'];
+          // API set
+          pm25 = data['list'][0]['components']['pm2_5'] ?? 0.0;
           isLoading = false;
         });
       } else {
@@ -159,7 +160,7 @@ class _SearchPageState extends State<SearchPage> {
                             Text(
                               selectedCity,
                               style: TextStyle(
-                                fontSize: screenWidth * 0.06,
+                                fontSize: screenWidth * 0.07,
                                 // ขนาดฟอนต์ตามความกว้างหน้าจอ
                                 fontWeight: FontWeight.bold,
                               ),
